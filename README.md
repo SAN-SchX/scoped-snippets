@@ -33,7 +33,7 @@ To remove a snippet from a file, choose:
 
 	— none —
 
-![Scoped Snippets demo](assets/demo-scoped-snipped.gif)
+![Scoped Snippets demo](assets/demo-scoped-snippets.gif)
 
 ## ⚙️ Settings
 
