@@ -1,0 +1,138 @@
+/* Base Scoped Snippets UI */
+.base-scoped-snippets-header {
+  position: relative;
+}
+
+.base-scoped-snippets-picker {
+  --bss-control-height: 24px;
+  --bss-control-radius: 6px;
+  --bss-control-width: 128px;
+  --bss-control-border: var(--background-modifier-border);
+  --bss-control-bg: var(--background-secondary-alt);
+  --bss-control-bg-hover: var(--background-modifier-hover);
+  --bss-control-fg: var(--text-muted);
+  --bss-control-fg-hover: var(--text-normal);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: 8px;
+  margin-inline-end: 8px;
+  max-width: 280px;
+  min-width: 0;
+  flex: 0 1 auto;
+  contain: layout style;
+  z-index: 10;
+}
+
+.base-scoped-snippets-picker-left {
+  margin-inline-start: 6px;
+  margin-inline-end: 10px;
+}
+
+.base-scoped-snippets-picker-right {
+  margin-inline-start: 8px;
+  margin-inline-end: 8px;
+}
+
+.base-scoped-snippets-picker-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  max-width: min(300px, 42vw);
+}
+
+.base-scoped-snippets-picker-label {
+  color: var(--text-faint);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.base-scoped-snippets-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: var(--bss-control-width);
+  min-width: var(--bss-control-width);
+  max-width: var(--bss-control-width);
+  flex: 0 0 var(--bss-control-width);
+  overflow: hidden;
+}
+
+.base-scoped-snippets-select {
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none !important;
+  outline: none;
+
+  width: var(--bss-control-width);
+  max-width: var(--bss-control-width);
+  min-width: var(--bss-control-width);
+  height: var(--bss-control-height);
+  margin: 0;
+  /* Keep the selected value visually near the center, but a touch left of true center.
+     The extra inline-end padding balances against native dropdown arrow space on platforms
+     that still reserve it even when the arrow is hidden. */
+  padding-block: 0;
+  padding-inline-start: 8px;
+  padding-inline-end: 18px;
+
+  border: 1px solid var(--bss-control-border) !important;
+  border-radius: var(--bss-control-radius) !important;
+  background-color: var(--bss-control-bg) !important;
+  color: var(--bss-control-fg) !important;
+
+  font-size: var(--font-ui-smaller);
+  font-weight: 400;
+  line-height: calc(var(--bss-control-height) - 2px);
+  text-align: center;
+  text-align-last: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.base-scoped-snippets-select option {
+  text-align: center;
+}
+
+.base-scoped-snippets-select:hover {
+  background-color: var(--bss-control-bg-hover) !important;
+  color: var(--bss-control-fg-hover) !important;
+  border-color: var(--background-modifier-border-hover) !important;
+}
+
+.base-scoped-snippets-select:focus,
+.base-scoped-snippets-select:focus-visible {
+  border-color: var(--interactive-accent) !important;
+  color: var(--text-normal) !important;
+}
+
+.base-scoped-snippets-select:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.base-scoped-snippets-select:disabled + * {
+  opacity: 0.5;
+}
+
+.base-scoped-snippets-picker-center .base-scoped-snippets-select-wrap,
+.base-scoped-snippets-picker-center .base-scoped-snippets-select {
+  width: var(--bss-control-width);
+  min-width: var(--bss-control-width);
+  max-width: var(--bss-control-width);
+}
+
+.base-scoped-snippets-settings-info {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  margin-top: 1em;
+}
