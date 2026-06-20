@@ -66,10 +66,10 @@
   overflow: hidden;
 }
 
-.base-scoped-snippets-select {
+.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown {
   appearance: none;
   -webkit-appearance: none;
-  box-shadow: none !important;
+  box-shadow: none;
   outline: none;
 
   width: var(--bss-control-width);
@@ -84,10 +84,11 @@
   padding-inline-start: 8px;
   padding-inline-end: 18px;
 
-  border: 1px solid var(--bss-control-border) !important;
-  border-radius: var(--bss-control-radius) !important;
-  background-color: var(--bss-control-bg) !important;
-  color: var(--bss-control-fg) !important;
+  border: 1px solid var(--bss-control-border);
+  border-radius: var(--bss-control-radius);
+  background-color: var(--bss-control-bg);
+  background-image: none;
+  color: var(--bss-control-fg);
 
   font-size: var(--font-ui-smaller);
   font-weight: 400;
@@ -99,20 +100,20 @@
   text-overflow: ellipsis;
 }
 
-.base-scoped-snippets-select option {
+.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown option {
   text-align: center;
 }
 
-.base-scoped-snippets-select:hover {
-  background-color: var(--bss-control-bg-hover) !important;
-  color: var(--bss-control-fg-hover) !important;
-  border-color: var(--background-modifier-border-hover) !important;
+.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown:hover {
+  background-color: var(--bss-control-bg-hover);
+  color: var(--bss-control-fg-hover);
+  border-color: var(--background-modifier-border-hover);
 }
 
-.base-scoped-snippets-select:focus,
-.base-scoped-snippets-select:focus-visible {
-  border-color: var(--interactive-accent) !important;
-  color: var(--text-normal) !important;
+.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown:focus,
+.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown:focus-visible {
+  border-color: var(--interactive-accent);
+  color: var(--text-normal);
 }
 
 .base-scoped-snippets-select:disabled {
@@ -125,7 +126,7 @@
 }
 
 .base-scoped-snippets-picker-center .base-scoped-snippets-select-wrap,
-.base-scoped-snippets-picker-center .base-scoped-snippets-select {
+.base-scoped-snippets-picker-center .base-scoped-snippets-picker .base-scoped-snippets-select.dropdown {
   width: var(--bss-control-width);
   min-width: var(--bss-control-width);
   max-width: var(--bss-control-width);
