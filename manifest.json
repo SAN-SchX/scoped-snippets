@@ -3,7 +3,7 @@
   "name": "Scoped Snippets",
   "version": "0.4.0",
   "minAppVersion": "1.10.0",
-  "description": "Choose a CSS snippet per Obsidian .base or .md file, and apply it only to that Base or Markdown view.",
+  "description": "Choose a CSS snippet per .base or .md file, and apply it only to that Base or Markdown view.",
   "author": "SAN-SchX",
   "isDesktopOnly": false
 }
