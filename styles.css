@@ -35,15 +35,6 @@
   margin-inline-end: 8px;
 }
 
-.base-scoped-snippets-picker-center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
-  max-width: min(300px, 42vw);
-}
-
 .base-scoped-snippets-picker-label {
   color: var(--text-faint);
   font-size: 10px;
@@ -66,23 +57,23 @@
   overflow: hidden;
 }
 
-.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown {
+.base-scoped-snippets-picker .base-scoped-snippets-button.dropdown {
   appearance: none;
   -webkit-appearance: none;
   box-shadow: none;
   outline: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   width: var(--bss-control-width);
   max-width: var(--bss-control-width);
   min-width: var(--bss-control-width);
   height: var(--bss-control-height);
   margin: 0;
-  /* Keep the selected value visually near the center, but a touch left of true center.
-     The extra inline-end padding balances against native dropdown arrow space on platforms
-     that still reserve it even when the arrow is hidden. */
   padding-block: 0;
-  padding-inline-start: 8px;
-  padding-inline-end: 18px;
+  padding-inline: 10px;
 
   border: 1px solid var(--bss-control-border);
   border-radius: var(--bss-control-radius);
@@ -92,44 +83,134 @@
 
   font-size: var(--font-ui-smaller);
   font-weight: 400;
-  line-height: calc(var(--bss-control-height) - 2px);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.base-scoped-snippets-button-label {
+  display: block;
+  width: 100%;
   text-align: center;
-  text-align-last: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown option {
-  text-align: center;
+.base-scoped-snippets-picker .base-scoped-snippets-button.base-scoped-snippets-button-empty {
+  color: var(--text-faint);
 }
 
-.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown:hover {
+.base-scoped-snippets-picker .base-scoped-snippets-button.dropdown:hover {
   background-color: var(--bss-control-bg-hover);
   color: var(--bss-control-fg-hover);
   border-color: var(--background-modifier-border-hover);
 }
 
-.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown:focus,
-.base-scoped-snippets-picker .base-scoped-snippets-select.dropdown:focus-visible {
+.base-scoped-snippets-picker .base-scoped-snippets-button.dropdown:focus,
+.base-scoped-snippets-picker .base-scoped-snippets-button.dropdown:focus-visible,
+.base-scoped-snippets-picker .base-scoped-snippets-button.dropdown.is-open {
   border-color: var(--interactive-accent);
   color: var(--text-normal);
 }
 
-.base-scoped-snippets-select:disabled {
+.base-scoped-snippets-button:disabled {
   cursor: default;
   opacity: 0.5;
 }
 
-.base-scoped-snippets-select:disabled + * {
-  opacity: 0.5;
+.base-scoped-snippets-popup {
+  position: fixed;
+  z-index: var(--layer-menu, 100);
+  min-width: 180px;
+  max-width: 300px;
+  max-height: 340px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+  box-shadow: var(--shadow-s, 0 4px 16px rgba(0, 0, 0, 0.25));
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
 }
 
-.base-scoped-snippets-picker-center .base-scoped-snippets-select-wrap,
-.base-scoped-snippets-picker-center .base-scoped-snippets-picker .base-scoped-snippets-select.dropdown {
-  width: var(--bss-control-width);
-  min-width: var(--bss-control-width);
-  max-width: var(--bss-control-width);
+.base-scoped-snippets-popup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 6px 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.base-scoped-snippets-popup-title {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.base-scoped-snippets-popup-clear {
+  height: auto;
+  padding: 2px 8px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.base-scoped-snippets-popup-clear:hover:not(:disabled) {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.base-scoped-snippets-popup-clear:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.base-scoped-snippets-popup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow-y: auto;
+}
+
+.base-scoped-snippets-popup-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.base-scoped-snippets-popup-row:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.base-scoped-snippets-popup-checkbox {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.base-scoped-snippets-popup-row-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.base-scoped-snippets-popup-row.is-missing .base-scoped-snippets-popup-row-label {
+  color: var(--text-error);
+}
+
+.base-scoped-snippets-popup-empty {
+  padding: 8px 6px;
+  color: var(--text-muted);
 }
 
 .base-scoped-snippets-settings-info {
