@@ -9,7 +9,7 @@ If a snippet is enabled there, Obsidian will apply it globally across the entire
 
 ## Installation
 
-Manual Installation:
+**Manual Installation:**
 
 Download the latest release from the GitHub releases page.
 Extract the downloaded ZIP file.
@@ -21,19 +21,22 @@ Restart Obsidian.
 Go to Settings → Community plugins.
 Enable Scoped Snippets.
 
+**From Obsidian Community Plugins:**
+1. Open Settings → Community plugins.
+2. Click **Browse** and search for "Scoped Snippets".
+3. Click **Install**, then **Enable**.
+
 ## Usage
 
 Add your CSS snippets to:
 
 	.obsidian/snippets/
 
-Open a Markdown `.md` or Base `.base` file then use the dropdown in the file view header. Select the CSS snippet you want to apply to that specific file.
+Open a Markdown `.md` or Base `.base` file then use the picker in the file view header. Tick one or more CSS snippets to apply them to that specific file. The button shows the current selection (`— none —`, the snippet name, or `N snippets`).
 
-To remove a snippet from a file, choose:
+To remove a snippets from a file, click "Clear" button
 
-	— none —
-
-![Scoped Snippets demo](assets/demo-scoped-snippets.gif)
+![Scoped Snippets demo](assets/demo_0_5_0v2.gif)
 
 ## ⚙️ Settings
 
@@ -46,14 +49,18 @@ Available settings:
 1. Show or hide the snippet selector in supported file views.
 2. Dropdown position:
 	- Left
-	- Center
 	- Right
 
-Hiding the dropdown does not disable already assigned snippets. It only hides the selector UI.
+Hiding the selector does not disable already assigned snippets. It only hides the selector UI.
 
 ## Limitations
 
 Scoped Snippets is designed to scope regular CSS selectors to a specific file view. Some very complex CSS snippets, especially those using global selectors, advanced at-rules, or theme-wide variables, may require small adjustments to work perfectly when scoped.
+
+## 🟢 changelog v0.5.0
+
+- Replaced the dropdown component with a picker for improved usability.
+- Removed the "center" position option for the selector.
 
 ## License
 
