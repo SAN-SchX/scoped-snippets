@@ -1,7 +1,7 @@
 {
   "id": "scoped-snippets",
   "name": "Scoped Snippets",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "minAppVersion": "1.10.0",
   "description": "Choose a CSS snippets per .base or .md file, and apply them only to that Base or Markdown view.",
   "author": "SAN-SchX",
