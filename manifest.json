@@ -3,7 +3,7 @@
   "name": "Scoped Snippets",
   "version": "0.6.4",
   "minAppVersion": "1.10.0",
-  "description": "Choose a CSS snippets per .base or .md file, and apply them only to that Base or Markdown view.",
+  "description": "Choose a CSS snippets per .base or .md file, and apply them only to that Base or Markdown view, and create or edit them with a built-in snippet editor.",
   "author": "SAN-SchX",
   "isDesktopOnly": false
 }
