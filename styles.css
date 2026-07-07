@@ -218,3 +218,614 @@
   font-size: var(--font-ui-small);
   margin-top: 1em;
 }
+
+/* Snippet editor view (IDE-style layout) */
+.scoped-snippets-ide-content {
+  padding: 0;
+  overflow: hidden;
+}
+
+.scoped-snippets-ide {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.scoped-snippets-ide-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--ssc-sidebar-width, 200px);
+  min-width: 0;
+  background-color: var(--background-secondary);
+  border-right: 1px solid var(--background-modifier-border);
+  transition: flex-basis 160ms ease;
+}
+
+.scoped-snippets-ide-sidebar.is-resizing {
+  transition: none;
+}
+
+.scoped-snippets-ide.is-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+.scoped-snippets-ide-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 5;
+}
+
+.scoped-snippets-ide-resizer:hover {
+  background-color: color-mix(in srgb, var(--interactive-accent) 35%, transparent);
+}
+
+.scoped-snippets-ide-count {
+  padding: 0 6px;
+  border-radius: 8px;
+  background-color: var(--background-modifier-hover);
+  color: var(--text-faint);
+  font-size: 10px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.scoped-snippets-ide-search {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 6px;
+}
+
+.scoped-snippets-ide-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 26px;
+  font-size: 12px;
+}
+
+.scoped-snippets-ide-refresh-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.scoped-snippets-ide-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 8px 6px 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scoped-snippets-ide-sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.scoped-snippets-ide-sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-sidebar {
+  flex: 0 0 40px;
+  min-width: 40px;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-sidebar-header {
+  padding: 8px 0 6px;
+  justify-content: center;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-sidebar-actions {
+  flex-direction: column-reverse;
+  gap: 4px;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-sidebar-title,
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-search,
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-resizer,
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-file-name,
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-file-delete {
+  display: none;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-files {
+  padding: 0 4px 8px;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-file {
+  justify-content: center;
+  padding: 5px 0;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-files .scoped-snippets-ide-dirty-dot {
+  position: absolute;
+  top: 1px;
+  right: 6px;
+  color: var(--interactive-accent);
+  font-size: 8px;
+}
+
+.scoped-snippets-ide-icon-button {
+  flex: 0 0 auto;
+}
+
+.scoped-snippets-ide-sidebar-actions .scoped-snippets-ide-icon-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.scoped-snippets-ide-file-delete {
+  padding: 2px;
+}
+
+.scoped-snippets-ide-file-delete svg {
+  width: 14px;
+  height: 14px;
+}
+
+.scoped-snippets-ide-files {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 6px 8px;
+}
+
+.scoped-snippets-ide-files-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-small);
+}
+
+.scoped-snippets-ide-sidebar-footer {
+  flex: 0 0 auto;
+  padding: 6px;
+}
+
+.scoped-snippets-ide-open-folder {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  font-size: var(--font-ui-small);
+}
+
+.scoped-snippets-ide-open-folder-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.scoped-snippets-ide-open-folder-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.scoped-snippets-ide-open-folder-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-open-folder-label {
+  display: none;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-sidebar-footer {
+  padding: 8px 4px;
+}
+
+.scoped-snippets-ide.is-collapsed .scoped-snippets-ide-open-folder {
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.scoped-snippets-ide-file {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.scoped-snippets-ide-file:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.scoped-snippets-ide-file.is-active {
+  background-color: var(--background-modifier-active-hover, var(--background-modifier-hover));
+  color: var(--text-normal);
+  box-shadow: inset 2px 0 0 var(--interactive-accent);
+}
+
+.scoped-snippets-ide-file-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--text-faint);
+}
+
+.scoped-snippets-ide-file-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.scoped-snippets-ide-file-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.scoped-snippets-ide-file-delete {
+  opacity: 0;
+  flex: 0 0 auto;
+}
+
+.scoped-snippets-ide-file:hover .scoped-snippets-ide-file-delete {
+  opacity: 1;
+}
+
+.scoped-snippets-ide-file-delete.is-armed {
+  opacity: 1;
+  color: var(--text-error);
+}
+
+.scoped-snippets-ide-new-file input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 22px;
+  font-size: 13px;
+}
+
+.scoped-snippets-ide-dirty-dot {
+  visibility: hidden;
+  flex: 0 0 auto;
+  color: var(--text-normal);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.scoped-snippets-ide-dirty-dot.is-visible {
+  visibility: visible;
+}
+
+.scoped-snippets-ide-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  background-color: var(--background-primary);
+}
+
+.scoped-snippets-ide-tabbar {
+  display: flex;
+  align-items: stretch;
+  min-height: 34px;
+  background-color: var(--background-secondary);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.scoped-snippets-ide-tabs {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.scoped-snippets-ide-tab-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.scoped-snippets-ide-save-button.is-dirty {
+  color: var(--interactive-accent);
+}
+
+.scoped-snippets-ide-save-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  background: transparent;
+}
+
+.scoped-snippets-ide-tab {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 7px;
+  padding: 0 8px 0 14px;
+  max-width: 200px;
+  background-color: transparent;
+  border-right: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.scoped-snippets-ide-tab.is-active {
+  background-color: var(--ssc-background, var(--background-primary));
+  box-shadow: inset 0 1px 0 var(--interactive-accent);
+  color: var(--ssc-foreground, var(--text-normal));
+}
+
+.scoped-snippets-ide-tab-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.scoped-snippets-ide-tab-close {
+  padding: 2px;
+  opacity: 0;
+}
+
+.scoped-snippets-ide-tab:hover .scoped-snippets-ide-tab-close,
+.scoped-snippets-ide-tab.is-active .scoped-snippets-ide-tab-close {
+  opacity: 1;
+}
+
+.scoped-snippets-ide-tab-close svg {
+  width: 12px;
+  height: 12px;
+}
+
+.scoped-snippets-ide-editor {
+  display: flex;
+  flex: 1 1 auto;
+  overflow: hidden;
+  background-color: var(--ssc-background, var(--background-primary));
+}
+
+.scoped-snippets-ide-placeholder {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.scoped-snippets-ide-placeholder-hint {
+  font-size: var(--font-ui-small);
+}
+
+.scoped-snippets-ide-placeholder-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.scoped-snippets-ide-gutter {
+  flex: 0 0 auto;
+  min-width: 44px;
+  padding: 8px 10px 8px 0;
+  overflow: hidden;
+  text-align: right;
+  white-space: pre;
+  background-color: var(--ssc-background, var(--background-primary));
+  color: var(--text-faint);
+  color: color-mix(in srgb, var(--ssc-foreground, var(--text-normal)) 40%, transparent);
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  line-height: 1.5;
+  user-select: none;
+}
+
+.scoped-snippets-ide-code {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  background-color: var(--ssc-background, var(--background-primary));
+}
+
+.scoped-snippets-ide-highlight {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 8px 12px;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+  color: var(--ssc-foreground, var(--text-normal));
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.scoped-snippets-ide-highlight code {
+  display: block;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.scoped-snippets-ide-textarea {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  resize: none;
+  background-color: transparent;
+  color: transparent;
+  caret-color: var(--ssc-foreground, var(--text-normal));
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+  tab-size: 2;
+}
+
+.scoped-snippets-ide-textarea:hover,
+.scoped-snippets-ide-textarea:active,
+.scoped-snippets-ide-textarea:focus,
+.scoped-snippets-ide-textarea:focus-visible {
+  border: none;
+  box-shadow: none;
+  outline: none;
+  background-color: transparent;
+}
+
+.scoped-snippets-ide-textarea::selection {
+  background-color: color-mix(in srgb, var(--ssc-foreground, var(--text-normal)) 25%, transparent);
+  color: transparent;
+}
+
+.ssc-tok-comment {
+  color: var(--ssc-comment);
+  font-style: italic;
+}
+
+.ssc-tok-string {
+  color: var(--ssc-string);
+}
+
+.ssc-tok-atrule {
+  color: var(--ssc-atrule);
+}
+
+.ssc-tok-selector {
+  color: var(--ssc-selector);
+}
+
+.ssc-tok-property {
+  color: var(--ssc-property);
+}
+
+.ssc-tok-value {
+  color: var(--ssc-value);
+}
+
+.ssc-tok-number {
+  color: var(--ssc-number);
+}
+
+.ssc-tok-function {
+  color: var(--ssc-function);
+}
+
+.ssc-tok-punctuation {
+  color: var(--ssc-punctuation);
+}
+
+.scoped-snippets-ide-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 22px;
+  padding: 0 12px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.scoped-snippets-ide-status-left {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scoped-snippets-ide-status-right {
+  display: flex;
+  gap: 14px;
+}
+
+.scoped-snippets-ide-status-right.is-hidden {
+  display: none;
+}
+
+.scoped-snippets-unsaved-modal {
+  width: min(440px, 90vw);
+}
+
+.scoped-snippets-unsaved-modal .modal-close-button {
+  display: none;
+}
+
+.scoped-snippets-unsaved-warning-icon {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  color: var(--color-yellow, var(--text-warning, #e0a500));
+}
+
+.scoped-snippets-unsaved-warning-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.scoped-snippets-unsaved-modal h3 {
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.scoped-snippets-unsaved-message {
+  margin: 0 0 4px;
+  text-align: center;
+}
+
+.scoped-snippets-unsaved-filename {
+  margin: 0 0 8px;
+  text-align: center;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.scoped-snippets-unsaved-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  text-align: center;
+}
+
+.scoped-snippets-unsaved-spacer {
+  flex: 1 1 auto;
+}
+
+.scoped-snippets-unsaved-discard {
+  color: var(--text-error);
+}
