@@ -1465,16 +1465,8 @@ class SnippetEditorView extends ItemView {
   }
 
   prefetchSnippetFiles() {
-    // Warm up file reads in the background so the first click on a snippet
-    // doesn't stall on slow storage (e.g. iCloud Drive re-downloading
-    // evicted files). Results are discarded; this only primes the OS cache.
-    // Skips files already buffered or already warmed this session, and reads
-    // a few at a time so a large folder doesn't contend with the read
-    // triggered by the user's first click.
     const snippets = this.plugin.snippetList || [];
 
-    // Prune names no longer in the folder so a deleted-then-recreated file
-    // is warmed again instead of being skipped forever.
     const known = new Set(snippets);
     for (const warmed of this.prefetchedSnippets) {
       if (!known.has(warmed)) this.prefetchedSnippets.delete(warmed);
@@ -1483,21 +1475,15 @@ class SnippetEditorView extends ItemView {
     const pending = snippets.filter(
       (name) => !this.buffers.has(name) && !this.prefetchedSnippets.has(name)
     );
-    // Marked before the read to keep overlapping prefetch calls from queueing
-    // the same file twice; removed again below if the warm-up read fails.
     for (const name of pending) this.prefetchedSnippets.add(name);
 
     const worker = async () => {
       let name;
       while ((name = pending.shift()) !== undefined) {
-        // The user may have opened this file while it sat in the queue;
-        // openSnippet's read already warmed it, so skip the duplicate.
         if (this.buffers.has(name)) continue;
         try {
           await this.app.vault.adapter.read(this.getSnippetPath(name));
         } catch (error) {
-          // Warm-up failed (e.g. still offline); un-mark so the next list
-          // change retries it. openSnippet reports real read errors.
           this.prefetchedSnippets.delete(name);
         }
       }
@@ -1973,18 +1959,12 @@ class SnippetEditorView extends ItemView {
     this.openSequence += 1;
     const sequence = this.openSequence;
 
-    // A previous slow open's "Loading…" indicator may still be on screen;
-    // repaint immediately so it can't mislead while this open is in flight.
     if (this.loadingSnippet) {
       this.loadingSnippet = null;
       this.updateStatus();
     }
 
     if (!this.buffers.has(name)) {
-      // Show feedback if the read is slow (e.g. iCloud Drive downloading the
-      // file); the delay avoids a flicker on fast local reads. The loading
-      // state is rendered by updateStatus so it has a single owner, and the
-      // sequence guard keeps a superseded open from showing stale text.
       if (this.loadingTimer) window.clearTimeout(this.loadingTimer);
       const loadingTimer = window.setTimeout(() => {
         if (sequence !== this.openSequence) return;
@@ -2003,8 +1983,6 @@ class SnippetEditorView extends ItemView {
       } finally {
         window.clearTimeout(loadingTimer);
         if (this.loadingTimer === loadingTimer) this.loadingTimer = null;
-        // Only the still-current open may clear the indicator: a superseded
-        // open of the same name must not wipe the live open's loading state.
         if (this.loadingSnippet === name && sequence === this.openSequence) {
           this.loadingSnippet = null;
           this.updateStatus();
@@ -2236,8 +2214,6 @@ class SnippetEditorView extends ItemView {
       if (value) tokens.push({ type, value });
     };
 
-    // Sticky regexes matched in-place via lastIndex — avoids copying the
-    // remainder of the file on every token (O(n²) on large snippets).
     const atruleRe = /@[\w-]+/y;
     const wsRe = /\s+/y;
     const selectorRe = /[^\s{};,]+/y;
@@ -2245,8 +2221,6 @@ class SnippetEditorView extends ItemView {
     const numRe = /-?(?:\d+\.?\d*|\.\d+)[a-zA-Z%]*/y;
     const importantRe = /!\s*important\b/iy;
     const fnRe = /(?:--)?[-\w]+(?=\()/y;
-    // Shared by the property branch and the value-word branch; matchAt
-    // resets lastIndex before every exec, so one object is safe for both.
     const identRe = /(?:--)?[-\w]+/y;
     const matchAt = (re, pos) => {
       re.lastIndex = pos;
@@ -2459,16 +2433,11 @@ class SnippetEditorView extends ItemView {
 
   async saveSnippet(name) {
     if (!this.buffers.has(name)) return false;
-    // Re-entrancy guard: on slow storage the conflict read/write below can
-    // take seconds; a second save of the same file (double Ctrl+S) would
-    // race the first.
     if (this.savingSnippet === name) return false;
 
     const contents = this.buffers.get(name);
     const path = this.getSnippetPath(name);
 
-    // Rendered by updateStatus (like loadingSnippet) so the user sees why
-    // nothing happens while the conflict read/write waits on slow storage.
     this.savingSnippet = name;
     this.updateStatus();
 

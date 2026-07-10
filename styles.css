@@ -1,4 +1,3 @@
-/* Base Scoped Snippets UI */
 .scoped-snippets-header {
   position: relative;
 }
@@ -214,7 +213,6 @@
   margin-top: 1em;
 }
 
-/* Snippet editor view (IDE-style layout) */
 .scoped-snippets-ide-content {
   padding: 0;
   overflow: hidden;
