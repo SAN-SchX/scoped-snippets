@@ -1304,6 +1304,10 @@ class SnippetEditorView extends ItemView {
     this.bypassCloseGuard = false;
     this.openSequence = 0;
     this.draftTimer = null;
+    this.loadingTimer = null;
+    this.loadingSnippet = null;
+    this.savingSnippet = null;
+    this.prefetchedSnippets = new Set();
     this.stopResize = null;
     this.patchedLeaf = null;
     this.leafDetachOriginal = null;
@@ -1455,8 +1459,52 @@ class SnippetEditorView extends ItemView {
     await this.plugin.reloadSnippetList();
     this.renderFileList();
     this.renderEditor();
+    this.prefetchSnippetFiles();
 
     this.patchLeafDetach();
+  }
+
+  prefetchSnippetFiles() {
+    // Warm up file reads in the background so the first click on a snippet
+    // doesn't stall on slow storage (e.g. iCloud Drive re-downloading
+    // evicted files). Results are discarded; this only primes the OS cache.
+    // Skips files already buffered or already warmed this session, and reads
+    // a few at a time so a large folder doesn't contend with the read
+    // triggered by the user's first click.
+    const snippets = this.plugin.snippetList || [];
+
+    // Prune names no longer in the folder so a deleted-then-recreated file
+    // is warmed again instead of being skipped forever.
+    const known = new Set(snippets);
+    for (const warmed of this.prefetchedSnippets) {
+      if (!known.has(warmed)) this.prefetchedSnippets.delete(warmed);
+    }
+
+    const pending = snippets.filter(
+      (name) => !this.buffers.has(name) && !this.prefetchedSnippets.has(name)
+    );
+    // Marked before the read to keep overlapping prefetch calls from queueing
+    // the same file twice; removed again below if the warm-up read fails.
+    for (const name of pending) this.prefetchedSnippets.add(name);
+
+    const worker = async () => {
+      let name;
+      while ((name = pending.shift()) !== undefined) {
+        // The user may have opened this file while it sat in the queue;
+        // openSnippet's read already warmed it, so skip the duplicate.
+        if (this.buffers.has(name)) continue;
+        try {
+          await this.app.vault.adapter.read(this.getSnippetPath(name));
+        } catch (error) {
+          // Warm-up failed (e.g. still offline); un-mark so the next list
+          // change retries it. openSnippet reports real read errors.
+          this.prefetchedSnippets.delete(name);
+        }
+      }
+    };
+
+    const workers = Math.min(4, pending.length);
+    for (let i = 0; i < workers; i += 1) worker();
   }
 
   async onClose() {
@@ -1465,6 +1513,10 @@ class SnippetEditorView extends ItemView {
     if (this.draftTimer) {
       window.clearTimeout(this.draftTimer);
       this.draftTimer = null;
+    }
+    if (this.loadingTimer) {
+      window.clearTimeout(this.loadingTimer);
+      this.loadingTimer = null;
     }
 
     this.storeActiveBuffer();
@@ -1737,6 +1789,7 @@ class SnippetEditorView extends ItemView {
       this.renderTabs();
     }
     this.renderFileList();
+    this.prefetchSnippetFiles();
   }
 
   renderFileList() {
@@ -1920,7 +1973,26 @@ class SnippetEditorView extends ItemView {
     this.openSequence += 1;
     const sequence = this.openSequence;
 
+    // A previous slow open's "Loading…" indicator may still be on screen;
+    // repaint immediately so it can't mislead while this open is in flight.
+    if (this.loadingSnippet) {
+      this.loadingSnippet = null;
+      this.updateStatus();
+    }
+
     if (!this.buffers.has(name)) {
+      // Show feedback if the read is slow (e.g. iCloud Drive downloading the
+      // file); the delay avoids a flicker on fast local reads. The loading
+      // state is rendered by updateStatus so it has a single owner, and the
+      // sequence guard keeps a superseded open from showing stale text.
+      if (this.loadingTimer) window.clearTimeout(this.loadingTimer);
+      const loadingTimer = window.setTimeout(() => {
+        if (sequence !== this.openSequence) return;
+        this.loadingSnippet = name;
+        this.updateStatus();
+      }, 200);
+      this.loadingTimer = loadingTimer;
+
       let contents;
       try {
         contents = await this.app.vault.adapter.read(this.getSnippetPath(name));
@@ -1928,6 +2000,15 @@ class SnippetEditorView extends ItemView {
         console.warn(`Scoped Snippets: could not read ${this.getSnippetPath(name)}`, error);
         new Notice(`Could not read "${name}".`);
         return;
+      } finally {
+        window.clearTimeout(loadingTimer);
+        if (this.loadingTimer === loadingTimer) this.loadingTimer = null;
+        // Only the still-current open may clear the indicator: a superseded
+        // open of the same name must not wipe the live open's loading state.
+        if (this.loadingSnippet === name && sequence === this.openSequence) {
+          this.loadingSnippet = null;
+          this.updateStatus();
+        }
       }
 
       this.savedContents.set(name, contents);
@@ -2155,6 +2236,23 @@ class SnippetEditorView extends ItemView {
       if (value) tokens.push({ type, value });
     };
 
+    // Sticky regexes matched in-place via lastIndex — avoids copying the
+    // remainder of the file on every token (O(n²) on large snippets).
+    const atruleRe = /@[\w-]+/y;
+    const wsRe = /\s+/y;
+    const selectorRe = /[^\s{};,]+/y;
+    const hexRe = /#[0-9a-fA-F]{3,8}\b/y;
+    const numRe = /-?(?:\d+\.?\d*|\.\d+)[a-zA-Z%]*/y;
+    const importantRe = /!\s*important\b/iy;
+    const fnRe = /(?:--)?[-\w]+(?=\()/y;
+    // Shared by the property branch and the value-word branch; matchAt
+    // resets lastIndex before every exec, so one object is safe for both.
+    const identRe = /(?:--)?[-\w]+/y;
+    const matchAt = (re, pos) => {
+      re.lastIndex = pos;
+      return re.exec(text);
+    };
+
     let i = 0;
     const blocks = [];
     let inValue = false;
@@ -2216,7 +2314,7 @@ class SnippetEditorView extends ItemView {
       }
 
       if (ch === "@") {
-        const match = /^@[\w-]+/.exec(text.slice(i));
+        const match = matchAt(atruleRe, i);
         if (match) {
           atGroupPrelude = /^@(media|supports|container|layer|scope|document|(-\w+-)?keyframes)$/i.test(match[0]);
           push("atrule", match[0]);
@@ -2225,7 +2323,7 @@ class SnippetEditorView extends ItemView {
         }
       }
 
-      const ws = /^\s+/.exec(text.slice(i));
+      const ws = matchAt(wsRe, i);
       if (ws) {
         push("plain", ws[0]);
         i += ws[0].length;
@@ -2238,51 +2336,49 @@ class SnippetEditorView extends ItemView {
           i += 1;
           continue;
         }
-        const match = /^[^\s{};,]+/.exec(text.slice(i));
+        const match = matchAt(selectorRe, i);
         if (match) {
           push("selector", match[0]);
           i += match[0].length;
           continue;
         }
       } else if (!inValue) {
-        const match = /^(?:--)?[-\w]+/.exec(text.slice(i));
+        const match = matchAt(identRe, i);
         if (match) {
           push("property", match[0]);
           i += match[0].length;
           continue;
         }
       } else {
-        const slice = text.slice(i);
-
-        const hex = /^#[0-9a-fA-F]{3,8}\b/.exec(slice);
+        const hex = matchAt(hexRe, i);
         if (hex) {
           push("number", hex[0]);
           i += hex[0].length;
           continue;
         }
 
-        const num = /^-?(?:\d+\.?\d*|\.\d+)[a-zA-Z%]*/.exec(slice);
+        const num = matchAt(numRe, i);
         if (num) {
           push("number", num[0]);
           i += num[0].length;
           continue;
         }
 
-        const important = /^!\s*important\b/i.exec(slice);
+        const important = matchAt(importantRe, i);
         if (important) {
           push("atrule", important[0]);
           i += important[0].length;
           continue;
         }
 
-        const fn = /^(?:--)?[-\w]+(?=\()/.exec(slice);
+        const fn = matchAt(fnRe, i);
         if (fn) {
           push("function", fn[0]);
           i += fn[0].length;
           continue;
         }
 
-        const word = /^(?:--)?[-\w]+/.exec(slice);
+        const word = matchAt(identRe, i);
         if (word) {
           push("value", word[0]);
           i += word[0].length;
@@ -2320,8 +2416,20 @@ class SnippetEditorView extends ItemView {
 
     if (this.saveBtn) {
       const hasFile = Boolean(this.activeSnippet && this.textarea);
-      this.saveBtn.disabled = !hasFile;
+      this.saveBtn.disabled = !hasFile || Boolean(this.savingSnippet);
       this.saveBtn.classList.toggle("is-dirty", hasFile && this.isDirty(this.activeSnippet));
+    }
+
+    if (this.savingSnippet) {
+      this.statusLeftEl.textContent = `Saving "${this.savingSnippet}"…`;
+      this.statusRightEl.classList.add("is-hidden");
+      return;
+    }
+
+    if (this.loadingSnippet) {
+      this.statusLeftEl.textContent = `Loading "${this.loadingSnippet}"…`;
+      this.statusRightEl.classList.add("is-hidden");
+      return;
     }
 
     if (!this.activeSnippet || !this.textarea) {
@@ -2351,45 +2459,59 @@ class SnippetEditorView extends ItemView {
 
   async saveSnippet(name) {
     if (!this.buffers.has(name)) return false;
+    // Re-entrancy guard: on slow storage the conflict read/write below can
+    // take seconds; a second save of the same file (double Ctrl+S) would
+    // race the first.
+    if (this.savingSnippet === name) return false;
 
     const contents = this.buffers.get(name);
     const path = this.getSnippetPath(name);
 
-    let diskContents = null;
-    try {
-      diskContents = await this.app.vault.adapter.read(path);
-    } catch (error) {
-      diskContents = null;
-    }
+    // Rendered by updateStatus (like loadingSnippet) so the user sees why
+    // nothing happens while the conflict read/write waits on slow storage.
+    this.savingSnippet = name;
+    this.updateStatus();
 
-    if (
-      diskContents !== null &&
-      diskContents !== this.savedContents.get(name) &&
-      diskContents !== contents &&
-      this.conflictOverride !== name
-    ) {
-      this.savedContents.set(name, diskContents);
-      this.conflictOverride = name;
+    try {
+      let diskContents = null;
+      try {
+        diskContents = await this.app.vault.adapter.read(path);
+      } catch (error) {
+        diskContents = null;
+      }
+
+      if (
+        diskContents !== null &&
+        diskContents !== this.savedContents.get(name) &&
+        diskContents !== contents &&
+        this.conflictOverride !== name
+      ) {
+        this.savedContents.set(name, diskContents);
+        this.conflictOverride = name;
+        this.updateDirtyIndicators();
+        new Notice(`"${name}" changed on disk since it was opened. Save again to overwrite the external changes.`);
+        return false;
+      }
+      this.conflictOverride = null;
+
+      try {
+        await this.app.vault.adapter.write(path, contents);
+      } catch (error) {
+        console.warn(`Scoped Snippets: could not write ${path}`, error);
+        new Notice(`Could not save "${name}".`);
+        return false;
+      }
+
+      this.savedContents.set(name, contents);
+      this.clearDraft(name);
       this.updateDirtyIndicators();
-      new Notice(`"${name}" changed on disk since it was opened. Save again to overwrite the external changes.`);
-      return false;
+      new Notice(`Saved "${name}".`);
+      await this.plugin.refreshAfterSnippetChange();
+      return true;
+    } finally {
+      if (this.savingSnippet === name) this.savingSnippet = null;
+      this.updateStatus();
     }
-    this.conflictOverride = null;
-
-    try {
-      await this.app.vault.adapter.write(path, contents);
-    } catch (error) {
-      console.warn(`Scoped Snippets: could not write ${path}`, error);
-      new Notice(`Could not save "${name}".`);
-      return false;
-    }
-
-    this.savedContents.set(name, contents);
-    this.clearDraft(name);
-    this.updateDirtyIndicators();
-    new Notice(`Saved "${name}".`);
-    await this.plugin.refreshAfterSnippetChange();
-    return true;
   }
 
   async deleteSnippet(name) {

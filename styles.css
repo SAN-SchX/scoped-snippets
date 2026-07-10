@@ -30,11 +30,6 @@
   margin-inline-end: 10px;
 }
 
-.scoped-snippets-picker-right {
-  margin-inline-start: 8px;
-  margin-inline-end: 8px;
-}
-
 .scoped-snippets-picker-label {
   color: var(--text-faint);
   font-size: 10px;
@@ -289,7 +284,10 @@
   font-size: 12px;
 }
 
-.scoped-snippets-ide-refresh-button svg {
+.scoped-snippets-ide-refresh-button svg,
+.scoped-snippets-ide-file-delete svg,
+.scoped-snippets-ide-open-folder-icon svg,
+.scoped-snippets-ide-file-icon svg {
   width: 14px;
   height: 14px;
 }
@@ -369,15 +367,6 @@
   height: 16px;
 }
 
-.scoped-snippets-ide-file-delete {
-  padding: 2px;
-}
-
-.scoped-snippets-ide-file-delete svg {
-  width: 14px;
-  height: 14px;
-}
-
 .scoped-snippets-ide-files {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -411,11 +400,6 @@
   flex: 0 0 auto;
 }
 
-.scoped-snippets-ide-open-folder-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
 .scoped-snippets-ide-open-folder-label {
   overflow: hidden;
   white-space: nowrap;
@@ -431,7 +415,6 @@
 }
 
 .scoped-snippets-ide.is-collapsed .scoped-snippets-ide-open-folder {
-  justify-content: center;
   padding: 6px 0;
 }
 
@@ -465,11 +448,6 @@
   color: var(--text-faint);
 }
 
-.scoped-snippets-ide-file-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
 .scoped-snippets-ide-file-name {
   flex: 1 1 auto;
   overflow: hidden;
@@ -478,8 +456,8 @@
 }
 
 .scoped-snippets-ide-file-delete {
+  padding: 2px;
   opacity: 0;
-  flex: 0 0 auto;
 }
 
 .scoped-snippets-ide-file:hover .scoped-snippets-ide-file-delete {
